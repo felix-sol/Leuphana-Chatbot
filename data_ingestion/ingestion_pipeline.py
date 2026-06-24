@@ -1,0 +1,1 @@
+#TODO Skript für die Einfrührung der Daten in Vektordatenbank

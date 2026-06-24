@@ -1,0 +1,1 @@
+#TODO Klasse dient später als Orchestrator, ruft die Services auf nachdem User requests eingehen über das Chatbot-Interface.
