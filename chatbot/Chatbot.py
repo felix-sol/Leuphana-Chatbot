@@ -47,32 +47,51 @@ class Chatbot:
         context = self._build_context_block(chunks)
         user_msg = self._build_user_message(user_message, context)
 
-        answer = self.llm.send_sample_request(
+        answer = self.llm.send_llm_request(
             user_message=user_msg,
             system_message=SYSTEM_PROMPT,
         )
         return answer, chunks
 
     def chat_with_history(self, user_message: str) -> tuple[str, list[dict]]:
-        """
-        Multi-Turn: Berücksichtigt den bisherigen Gesprächsverlauf.
-        Gibt (Antwort, genutzte_chunks) zurück.
-        """
-        chunks = self.retrieval.retrieve(user_message, n_results=self.n_results)
-        context = self._build_context_block(chunks)
-        user_msg = self._build_user_message(user_message, context)
-
-        self.history.append({"role": "user", "content": user_msg})
-
-        messages = [{"role": "system", "content": SYSTEM_PROMPT}] + self.history
-
-        completion = self.llm.client.chat.completions.create(
-            model=self.llm.model,
-            messages=messages,
+        chunks = self.retrieval.retrieve(
+            user_message,
+            n_results=self.n_results
         )
-        answer = completion.choices[0].message.content
 
-        self.history.append({"role": "assistant", "content": answer})
+        context = self._build_context_block(chunks)
+
+        user_msg = self._build_user_message(
+            user_message,
+            context
+        )
+
+        messages = [
+            {
+                "role": "system",
+                "content": SYSTEM_PROMPT
+            }
+        ]
+
+        messages.extend(self.history)
+
+        messages.append({
+            "role": "user",
+            "content": user_msg
+        })
+
+        answer = self.llm.send_messages(messages)
+
+        self.history.append({
+            "role": "user",
+            "content": user_message
+        })
+
+        self.history.append({
+            "role": "assistant",
+            "content": answer
+        })
+
         return answer, chunks
 
     def reset_history(self) -> None:

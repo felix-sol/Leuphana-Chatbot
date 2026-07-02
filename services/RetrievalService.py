@@ -16,7 +16,7 @@ class RetrievalService:
             print("[WARNING] Vektordatenbank ist leer. Bitte run_ingestion.py ausführen.")
             return []
 
-        query_embedding = self.embedding_service.create_sample_embedding(query)
+        query_embedding = self.embedding_service.create_embedding(query)
         results = self.db.query(query_embedding, n_results=n_results)
         return results
 

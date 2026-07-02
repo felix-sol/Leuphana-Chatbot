@@ -32,6 +32,10 @@ class IngestionPipeline:
                 if shape.has_text_frame:
                     texts.append(shape.text_frame.text)
         return "\n".join(t for t in texts if t.strip())
+    
+    def parse_xlsx(self, path: Path) -> str:
+        # TODO Implement Excel parsing
+        return None
 
     def _parse_file(self, path: Path) -> Optional[str]:
         suffix = path.suffix.lower()
@@ -42,6 +46,8 @@ class IngestionPipeline:
                 return self.parse_pdf(path)
             elif suffix == ".pptx":
                 return self.parse_pptx(path)
+            elif suffix in {".xlsx", ".xls"}:
+                return self.parse_xlsx(path)
         except Exception as e:
             print(f"[WARNING] Konnte {path.name} nicht lesen: {e}")
         return None

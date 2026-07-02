@@ -17,7 +17,7 @@ class LlmService:
             base_url=self.base_url
         )
 
-    def send_sample_request(self, user_message: str, system_message: str):
+    def send_llm_request(self, user_message: str, system_message: str):
             completion = self.client.chat.completions.create(
                 model=self.model,
                 messages=[
@@ -26,14 +26,14 @@ class LlmService:
                 ]
             )
             return completion.choices[0].message.content
+    
+    def send_messages(self, messages: list[dict]):
+        completion = self.client.chat.completions.create(
+        model=self.model,
+        messages=messages
+        )
+        return completion.choices[0].message.content
 
 
-if __name__ == "__main__":
-    llm_service = LlmService()
+
     
-    response = llm_service.send_sample_request(
-        user_message="What is the Capital of Scotland?",
-        system_message="You are a geography expert."
-    )
-    
-    print(response)

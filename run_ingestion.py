@@ -25,7 +25,7 @@ def _embed_with_retry(service: EmbeddingService, text: str, retries: int = 3) ->
     """Versucht ein Embedding zu erstellen, überspringt den Chunk nach mehreren Fehlern."""
     for attempt in range(retries):
         try:
-            return service.create_sample_embedding(text)
+            return service.create_embedding(text)
         except Exception as e:
             if attempt < retries - 1:
                 time.sleep(1)

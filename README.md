@@ -26,7 +26,6 @@ source venv/bin/activate
 ### 2. Abhängigkeiten installieren
 ```bash
 pip install -r requirements.txt
-pip install -r requirements-new.txt
 ```
 
 ### 3. API-Key setzen

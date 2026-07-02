@@ -75,7 +75,7 @@ class VectorDatabaseManager:
                 "text": doc,
                 "source": meta.get("source", ""),
                 "category": meta.get("category", ""),
-                "score": round(1 - dist, 4),  # Cosine-Distance → Similarity
+                "score": round(max(0, 1 - dist), 4),  # Cosine-Distance → Similarity
             })
         return chunks
 

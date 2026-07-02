@@ -17,7 +17,7 @@ class EmbeddingService:
             base_url=self.base_url
         )
 
-    def create_sample_embedding(self, text: str):
+    def create_embedding(self, text: str):
         embedding = self.client.embeddings.create(
             model=self.model,
             input=text
@@ -25,12 +25,5 @@ class EmbeddingService:
         return embedding.data[0].embedding    
 
     
-if __name__ == "__main__":
-    embedding_service = EmbeddingService()
 
-    embedding = embedding_service.create_sample_embedding(
-        text="This is a sample text for embedding."
-    )
-    print(embedding)
-        
         
