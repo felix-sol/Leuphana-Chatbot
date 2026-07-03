@@ -27,6 +27,15 @@ def _embed_with_retry(service: EmbeddingService, text: str, retries: int = 3) ->
         try:
             return service.create_embedding(text)
         except Exception as e:
+            error_msg = str(e)
+
+            # Rate Limit erreicht
+            if "429" in error_msg:
+                print("\n[INFO] Rate Limit erreicht. Warte 60 Sekunden...")
+                time.sleep(60)
+                continue
+
+
             if attempt < retries - 1:
                 time.sleep(1)
             else:
@@ -72,6 +81,7 @@ def run(reset: bool = False) -> None:
     skipped = 0
     for chunk in tqdm(chunks, desc="Embeddings"):
         emb = _embed_with_retry(embedding_service, chunk["text"])
+        time.sleep(0.2)
         if emb is not None:
             embeddings.append(emb)
             valid_chunks.append(chunk)

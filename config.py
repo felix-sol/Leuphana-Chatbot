@@ -8,5 +8,5 @@ EMBEDDING_MODEL = "multilingual-e5-large-instruct"
 # adjust the input directory as needed for your local environment
 INPUT_DIR = Path("C:/Projekte/Python/chatbot-design/Leuphana-Chatbot/raw_input_data")
 
-CHUNK_SIZE = 800
-CHUNK_OVERLAP = 150
+CHUNK_SIZE = 400
+CHUNK_OVERLAP = 75

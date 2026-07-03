@@ -1,14 +1,18 @@
-import os
 from pathlib import Path
 from typing import Optional
+from openpyxl import load_workbook
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from config import CHUNK_SIZE, CHUNK_OVERLAP
 
 
 class IngestionPipeline:
-    def __init__(self, data_dir: str = "./raw_input_data", chunk_size: int = 1000, overlap: int = 100):
+    def __init__(self, data_dir: str = "./raw_input_data"):
         self.data_dir = Path(data_dir)
-        self.chunk_size = chunk_size
-        self.overlap = overlap
-
+        self.text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
+            chunk_size=CHUNK_SIZE,
+            chunk_overlap=CHUNK_OVERLAP,
+            separators=["\n\n", "\n", ".", " ", ""]
+        )
     # ── Parsers ──────────────────────────────────────────────────────────────
 
     def parse_docx(self, path: Path) -> str:
@@ -34,8 +38,27 @@ class IngestionPipeline:
         return "\n".join(t for t in texts if t.strip())
     
     def parse_xlsx(self, path: Path) -> str:
-        # TODO Implement Excel parsing
-        return None
+
+        workbook = load_workbook(path, data_only=True)
+
+        texts = []
+
+        for sheet in workbook.worksheets:
+            texts.append(f"=== Tabellenblatt: {sheet.title} ===")
+
+            for row in sheet.iter_rows(values_only=True):
+                values = [
+                    str(cell).strip()
+                    for cell in row
+                    if cell is not None and str(cell).strip()
+                ]
+
+                if values:
+                    texts.append(" | ".join(values))
+
+            texts.append("")  # Leerzeile zwischen Tabellenblättern
+
+        return "\n".join(texts)
 
     def _parse_file(self, path: Path) -> Optional[str]:
         suffix = path.suffix.lower()
@@ -89,16 +112,8 @@ class IngestionPipeline:
     # ── Chunking ─────────────────────────────────────────────────────────────
 
     def chunk_text(self, text: str) -> list[str]:
-        """Teilt Text in überlappende Chunks auf (zeichenbasiert, max ~512 Tokens)."""
-        chunks = []
-        start = 0
-        while start < len(text):
-            end = start + self.chunk_size
-            chunk = text[start:end].strip()
-            if chunk:
-                chunks.append(chunk)
-            start += self.chunk_size - self.overlap
-        return chunks
+        """Teilt den Text in überlappende, tokenbasierte Chunks auf."""
+        return self.text_splitter.split_text(text)
 
     def chunk_documents(self, documents: list[dict]) -> list[dict]:
         """
