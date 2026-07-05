@@ -1,17 +1,12 @@
+import logging
+from time import perf_counter
+
 from services.LlmService import LlmService
 from services.RetrievalService import RetrievalService
+from config import SYSTEM_PROMPT
 
-SYSTEM_PROMPT = """Du bist ein hilfreicher Assistent für Erstsemester-Studierende der Leuphana Universität Lüneburg.
-Du beantwortest Fragen rund ums Studium – von Campusleben über Prüfungen bis hin zu digitalen Tools.
 
-Halte dich an folgende Regeln:
-- Beantworte Fragen ausschließlich auf Basis des bereitgestellten Kontexts.
-- Wenn der Kontext keine ausreichende Antwort liefert, sage ehrlich: "Dazu habe ich leider keine Informationen."
-- Antworte auf Deutsch, es sei denn, die Frage wird auf Englisch gestellt.
-- Sei freundlich, klar und präzise.
-- Nenne am Ende deiner Antwort die genutzten Quellen in eckigen Klammern, z.B. [WLAN.docx].
-"""
-
+logger = logging.getLogger("uvicorn.error")
 
 class Chatbot:
     def __init__(self, n_results: int = 5):
@@ -43,21 +38,42 @@ class Chatbot:
         Einzel-Turn: Beantwortet eine Frage ohne History.
         Gibt (Antwort, genutzte_chunks) zurück.
         """
+        total_start = perf_counter()
+
+        retrieval_start = perf_counter()
         chunks = self.retrieval.retrieve(user_message, n_results=self.n_results)
+        retrieval_ms = (perf_counter() - retrieval_start) * 1000
+
         context = self._build_context_block(chunks)
         user_msg = self._build_user_message(user_message, context)
 
+        llm_start = perf_counter()
         answer = self.llm.send_llm_request(
             user_message=user_msg,
             system_message=SYSTEM_PROMPT,
         )
+        llm_ms = (perf_counter() - llm_start) * 1000
+        total_ms = (perf_counter() - total_start) * 1000
+
+        logger.info(
+            "chat_timing retrieval_ms=%.2f llm_ms=%.2f total_ms=%.2f chunks=%d",
+            retrieval_ms,
+            llm_ms,
+            total_ms,
+            len(chunks),
+        )
+
         return answer, chunks
 
     def chat_with_history(self, user_message: str) -> tuple[str, list[dict]]:
+        total_start = perf_counter()
+
+        retrieval_start = perf_counter()
         chunks = self.retrieval.retrieve(
             user_message,
             n_results=self.n_results
         )
+        retrieval_ms = (perf_counter() - retrieval_start) * 1000
 
         context = self._build_context_block(chunks)
 
@@ -80,7 +96,19 @@ class Chatbot:
             "content": user_msg
         })
 
+        llm_start = perf_counter()
         answer = self.llm.send_messages(messages)
+        llm_ms = (perf_counter() - llm_start) * 1000
+        total_ms = (perf_counter() - total_start) * 1000
+
+        logger.info(
+            "chat_with_history_timing retrieval_ms=%.2f llm_ms=%.2f total_ms=%.2f history_messages=%d chunks=%d",
+            retrieval_ms,
+            llm_ms,
+            total_ms,
+            len(self.history),
+            len(chunks),
+        )
 
         self.history.append({
             "role": "user",

@@ -1,0 +1,33 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Backend: FastAPI",
+      "type": "shell",
+      "command": ".\\venv\\Scripts\\python -m uvicorn api.server:app --reload --host 127.0.0.1 --port 8000",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Frontend: Vite",
+      "type": "shell",
+      "command": "npm run dev",
+      "options": {
+        "cwd": "${workspaceFolder}\\frontend"
+      },
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Dev: Frontend + Backend",
+      "dependsOn": [
+        "Backend: FastAPI",
+        "Frontend: Vite"
+      ],
+      "dependsOrder": "parallel"
+    }
+  ]
+}
