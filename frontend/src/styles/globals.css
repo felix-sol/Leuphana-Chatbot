@@ -1,0 +1,29 @@
+html,
+body,
+#root {
+	height: 100%;
+	overflow: hidden;
+}
+
+body {
+	margin: 0;
+	background: var(--background);
+	color: var(--foreground);
+	-webkit-font-smoothing: antialiased;
+	text-rendering: optimizeLegibility;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+button,
+textarea,
+input {
+	font: inherit;
+}
+
+::selection {
+	background: rgba(125, 29, 46, 0.18);
+	color: var(--foreground);
+}
