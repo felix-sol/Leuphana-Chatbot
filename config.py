@@ -4,9 +4,12 @@ import os
 ENDPOINT = "https://chat-ai.academiccloud.de/v1"
 LLM = "mistral-large-3-675b-instruct-2512"
 EMBEDDING_MODEL = "multilingual-e5-large-instruct"
-LLM_TIMEOUT_SECONDS = float(os.getenv("LLM_TIMEOUT_SECONDS", "15"))
-EMBEDDING_TIMEOUT_SECONDS = float(os.getenv("EMBEDDING_TIMEOUT_SECONDS", "8"))
-OPENAI_MAX_RETRIES = int(os.getenv("OPENAI_MAX_RETRIES", "0"))
+LLM_TIMEOUT_SECONDS = float(os.getenv("LLM_TIMEOUT_SECONDS", "30"))
+EMBEDDING_TIMEOUT_SECONDS = float(os.getenv("EMBEDDING_TIMEOUT_SECONDS", "15"))
+OPENAI_MAX_RETRIES = int(os.getenv("OPENAI_MAX_RETRIES", "1"))
+EMBEDDING_500_RETRIES = int(os.getenv("EMBEDDING_500_RETRIES", "2"))
+EMBEDDING_500_BACKOFF_MIN_MS = int(os.getenv("EMBEDDING_500_BACKOFF_MIN_MS", "300"))
+EMBEDDING_500_BACKOFF_MAX_MS = int(os.getenv("EMBEDDING_500_BACKOFF_MAX_MS", "600"))
 SYSTEM_PROMPT = """Du bist der digitale Studienassistent der Leuphana Universität Lüneburg und unterstützt insbesondere Erstsemester-Studierende bei Fragen rund um Studium, Campusleben, Prüfungen, digitale Dienste, organisatorische Abläufe und universitätsbezogene Angebote.
 
 ## Rolle und Kommunikation

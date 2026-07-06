@@ -6,7 +6,7 @@ from time import perf_counter
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from openai import APITimeoutError
+from openai import APIConnectionError, APITimeoutError, InternalServerError
 from pydantic import BaseModel, Field
 
 from chatbot.Chatbot import Chatbot
@@ -93,6 +93,32 @@ def chat(request: ChatRequest) -> ChatResponse:
         raise HTTPException(
             status_code=504,
             detail="Die Anfrage an den KI-Dienst hat das Zeitlimit ueberschritten. Bitte erneut versuchen.",
+        ) from exc
+    except InternalServerError as exc:
+        total_ms = (perf_counter() - request_start) * 1000
+        logger.warning(
+            "chat_request_upstream_500 session_id=%s total_ms=%.2f message_len=%d error=%s",
+            session_id,
+            total_ms,
+            len(question),
+            str(exc),
+        )
+        raise HTTPException(
+            status_code=502,
+            detail="Der KI-Dienst hat einen internen Fehler gemeldet. Bitte in einigen Sekunden erneut versuchen.",
+        ) from exc
+    except APIConnectionError as exc:
+        total_ms = (perf_counter() - request_start) * 1000
+        logger.warning(
+            "chat_request_upstream_connection_error session_id=%s total_ms=%.2f message_len=%d error=%s",
+            session_id,
+            total_ms,
+            len(question),
+            str(exc),
+        )
+        raise HTTPException(
+            status_code=503,
+            detail="Der KI-Dienst ist aktuell nicht erreichbar. Bitte spaeter erneut versuchen.",
         ) from exc
     except Exception:
         total_ms = (perf_counter() - request_start) * 1000
