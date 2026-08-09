@@ -2,7 +2,7 @@ from pathlib import Path
 import os
 
 ENDPOINT = "https://chat-ai.academiccloud.de/v1"
-LLM = "mistral-large-3-675b-instruct-2512"
+LLM = "qwen3.5-397b-a17b"
 EMBEDDING_MODEL = "multilingual-e5-large-instruct"
 LLM_TIMEOUT_SECONDS = float(os.getenv("LLM_TIMEOUT_SECONDS", "30"))
 EMBEDDING_TIMEOUT_SECONDS = float(os.getenv("EMBEDDING_TIMEOUT_SECONDS", "15"))
@@ -91,3 +91,6 @@ INPUT_DIR = Path("C:/Projekte/Python/chatbot-design/Leuphana-Chatbot/raw_input_d
 
 CHUNK_SIZE = 400
 CHUNK_OVERLAP = 75
+
+TEMPERATURE = 0.6
+TOP_P = 0.95
